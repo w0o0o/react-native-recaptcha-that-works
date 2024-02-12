@@ -181,11 +181,6 @@ export type RecaptchaProps = {
    * Use the new [reCAPTCHA Enterprise API](https://cloud.google.com/recaptcha-enterprise/docs/using-features).
    */
   enterprise?: boolean;
-  /**
-   * An [additional parameter](https://cloud.google.com/recaptcha-enterprise/docs/actions)
-   * for specifying the action name associated with the protected element for reCAPTCHA Enterprise API.
-   */
-  action?: string;
 };
 
 const Recaptcha = forwardRef<RecaptchaRef, RecaptchaProps>(
@@ -211,7 +206,6 @@ const Recaptcha = forwardRef<RecaptchaRef, RecaptchaProps>(
       recaptchaDomain = 'www.google.com',
       gstaticDomain = 'www.gstatic.com',
       hideBadge = false,
-      action,
     },
     $ref,
   ) => {
@@ -219,6 +213,7 @@ const Recaptcha = forwardRef<RecaptchaRef, RecaptchaProps>(
     const $webView = useRef<WebView | null>(null);
     const [visible, setVisible] = useState(false);
     const [loading, setLoading] = useState(true);
+    const action = useRef('');
 
     const isInvisibleSize = size === 'invisible';
 
@@ -229,7 +224,7 @@ const Recaptcha = forwardRef<RecaptchaRef, RecaptchaProps>(
           size,
           theme,
           lang,
-          action,
+          action: action.current
         },
         recaptchaDomain,
         gstaticDomain,
@@ -241,7 +236,7 @@ const Recaptcha = forwardRef<RecaptchaRef, RecaptchaProps>(
       size,
       theme,
       lang,
-      action,
+      action.current,
       enterprise,
       recaptchaDomain,
       gstaticDomain,
@@ -307,13 +302,14 @@ const Recaptcha = forwardRef<RecaptchaRef, RecaptchaProps>(
         html,
         baseUrl,
       }),
-      [html, baseUrl],
+      [html, baseUrl, action.current]
     );
 
     useImperativeHandle(
       $ref,
       () => ({
-        open: () => {
+        open: (a) => {
+          action.current = a;
           setVisible(true);
           setLoading(true);
           $isClosed.current = false;
